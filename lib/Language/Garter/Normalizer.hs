@@ -50,15 +50,26 @@ anf i (If c e1 e2 l)    = (i''', stitch bs  (If c' e1' e2' l))
     (i'' ,     e1')     = anf i'  e1
     (i''',     e2')     = anf i'' e2
 
-anf _i (Tuple _e1 _e2 _l)  = error "TBD:anf:Tuple"
+anf i (Tuple e1 e2 l)  = (i', stitch bs (Tuple v1 v2 l))
+  where
+    (i', bs, [v1, v2])  = imms i [e1, e2]
 
-anf _i (GetItem _e1 _f _l) = error "TBD:anf:Get"
 
-anf _i (App _e _es _l)     = error "TBD:anf:App"
+anf i (GetItem e1 f l) = (i', stitch bs (GetItem v1 f l))
+  where
+    (i', bs, v1) = imm i e1
 
-anf _i (Lam _xs _e _l)     = error "TBD:anf:Lam"
+anf i (App e es l)     = (i', stitch bs (App v vs l))
+    where
+      (i', bs, v:vs)       = imms i (e:es)
 
-anf _i (Fun _f _t _xs _e _l) = error "TBD:anf:Fun"
+anf i (Lam xs e l)     = (i', (Lam xs e' l))
+  where
+    (i', e')      = anf i e
+
+anf i (Fun f t xs e l) = (i', (Fun f t xs e' l))
+  where
+    (i' , e')     = anf i e
 
 --------------------------------------------------------------------------------
 -- | `stitch bs e` takes a "context" `bs` which is a list of temp-vars and their
@@ -111,11 +122,23 @@ imm i (Prim2 o e1 e2 l) = (i'', bs', mkId x l)
     (i'', x)            = fresh l i'
     bs'                 = (x, (Prim2 o v1 v2 l, l)) : bs
 
-imm _i (Tuple _e1 _e2 _l) = error "TBD:imm:Tuple"
+imm i (Tuple e1 e2 l) = (i'', bs', mkId x l)
+  where
+    (i', bs, [v1, v2])  = imms i [e1, e2]
+    (i'', x)            = fresh l i'
+    bs'                 = (x, (Tuple v1 v2 l, l)) : bs
 
-imm _i (GetItem _e1 _f _l) = error "TBD:imm:Get"
+imm i (GetItem e1 f l) = (i'', bs', mkId x l)
+  where
+    (i', bs, v1)        = imm i e1
+    (i'', x)            = fresh l i'
+    bs'                 = (x, (GetItem v1 f l, l)) : bs
 
-imm _i (App _e _es _l)     = error "TBD:imm:App"
+imm i (App e es l)     = (i'', bs', mkId x l)
+  where
+    (i', bs, vs)        = imms  i es
+    (i'', x)            = fresh l i'
+    bs'                 = (x, (App e vs l, l)) : bs
 
 imm i e@(If _ _ _  l)   = immExp i e l
 

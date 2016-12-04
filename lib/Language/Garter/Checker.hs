@@ -247,20 +247,20 @@ prim1Poly Sub1  = Forall [   ] ([TInt] :=> TInt)
 prim1Poly Print = Forall ["a"] ([ "a"] :=> "a")
 
 prim2Poly :: Prim2 -> Poly
-prim2Poly Plus    = error "TBD:prim2Poly"
-prim2Poly Minus   = error "TBD:prim2Poly"
-prim2Poly Times   = error "TBD:prim2Poly"
-prim2Poly Less    = error "TBD:prim2Poly"
-prim2Poly Greater = error "TBD:prim2Poly"
-prim2Poly Equal   = error "TBD:prim2Poly"
+prim2Poly Plus    = Forall [   ] ([TInt, TInt] :=> TInt)
+prim2Poly Minus   = Forall [   ] ([TInt, TInt] :=> TInt)
+prim2Poly Times   = Forall [   ] ([TInt, TInt] :=> TInt)
+prim2Poly Less    = Forall [   ] ([TInt, TInt] :=> TInt)
+prim2Poly Greater = Forall [   ] ([TInt, TInt] :=> TInt)
+prim2Poly Equal   = Forall [   ] ([TInt, TInt] :=> TInt)
 
 tupPoly, ifPoly :: Poly
-tupPoly           = error "TBD:tupPoly"
-ifPoly            = error "TBD:ifPoly"
+tupPoly           = Forall [ "a1", "a2" ] (["a1", "a2"] :=> (TPair "a1" "a2") ) -- tuple tkes two values
+ifPoly            = Forall [ "a", "b", "b" ] ([TBool, "b", "b"] :=> ("b"))
 
 fieldPoly :: Field -> Poly
-fieldPoly Zero    = error "TBD:fieldPoly:Zero"
-fieldPoly One     = error "TBD:fieldPoly:One"
+fieldPoly Zero    = Forall [  ] ([ TPair "a1" "a2" ] :=> "a")
+fieldPoly One     = Forall [  ] ([ TPair "a1" "a2" ] :=> "a")
 
 --------------------------------------------------------------------------------
 unify :: SourceSpan -> Subst -> Type -> Type -> Subst

@@ -75,6 +75,7 @@ import           Language.Garter.UX
 data Reg
   = EAX
   | EBX
+  | ECX
   | ESP
   | EBP
   | ESI

@@ -99,6 +99,7 @@ regAsm EBX = "ebx"
 regAsm ESP = "esp"
 regAsm EBP = "ebp"
 regAsm ESI = "esi"
+regAsm ECX = "ecx"
 
 sizeAsm :: Size -> Text
 sizeAsm DWordPtr = "DWORD"
