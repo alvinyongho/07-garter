@@ -84,7 +84,7 @@ duplicateBindErrors vEnv x
 
 largeNumberErrors :: Integer -> SourceSpan -> [UserError]
 largeNumberErrors n l
-  = condError (maxInt < abs n) (errLargeNum l n)
+  = condError (n < -maxInt || maxInt <= n) (errLargeNum l n)
 
 maxInt :: Integer
 maxInt = 1073741824

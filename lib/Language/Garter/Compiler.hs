@@ -452,9 +452,9 @@ subOp a1 a2 = [ ISub a1 a2
               ]
 
 mulOp :: AOp
-mulOp a1 a2 = [ IMul a1 a2
+mulOp a1 a2 = [ ISar a1 (Const 1)
+              , IMul a1 a2
               , overflow
-              , ISar a1 (Const 1)
               ]
 
 overflow :: Instruction

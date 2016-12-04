@@ -6,7 +6,7 @@ def link(h, t) as forall a. (a, List[a]) => List[a]:
   (h, t)
 in
 
-def swapList(p) :: forall a.((List[a], List[b])) => (List[b], List[a]) :
+def swapList(p) :: forall a, b. ((List[a], List[b])) => (List[b], List[a]) :
   (p[1], p[0])
 in
 

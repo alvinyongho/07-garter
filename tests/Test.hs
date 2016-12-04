@@ -116,6 +116,9 @@ garterTests sc =
   , mkTest sc "err-tc-00"        File  staticTypeError
   , mkTest sc "err-tc-01"        File  staticTypeError
   , mkTest sc "err-tc-02"        File  staticTypeError
+  , mkTest sc "err-tc-03"        File  staticTypeError 
+  , mkTest sc "err-tc-04"        File  staticTypeError 
+  , mkTest sc "err-tc-05"        File  staticTypeError 
   , mkTest sc "swap"             File  (rLines ["(15, 10)"])
   , mkTest sc "swapList"         File  (rLines ["((true, false), (1, false))"])
   , mkTest sc "err-swapList"     File  staticTypeError
