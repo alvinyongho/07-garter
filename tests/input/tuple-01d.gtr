@@ -1,0 +1,6 @@
+let t = (10, 20, 30),
+    x = print(t[0]),
+    y = print(t[1]),
+    z = print(t[2])
+in
+    x + y + t[2]

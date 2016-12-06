@@ -1,0 +1,7 @@
+let k = 12,
+    b = if isBool(k):
+    	  print(k + 1)
+    	else:
+		  12
+in
+   b * (0 - 10)

@@ -1,0 +1,7 @@
+let x = 5,
+    y = if isNum(x):
+		    123
+	    else:
+    	  1313
+in
+   y * y

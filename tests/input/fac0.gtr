@@ -1,0 +1,7 @@
+def fac(m):
+  if (m < 1):
+    1
+  else:
+    m * fac(m - 1)
+in
+fac(7)
