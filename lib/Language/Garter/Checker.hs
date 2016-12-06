@@ -201,12 +201,25 @@ ti env su (App eF eArgs l) = tiApp (sourceSpan l) sF (apply sF env) tF eArgs
 -- 4. Unify the *expected* output `tOut` with the *actual* `tBody`
 -- 5. Apply the substitutions to infer the function's type `tXs :=> tOut`.
 
-ti _env _su (Lam _xs _body _l) = error "TBD:ti:lam"
+ti env su (Lam xs body l) = (su3, apply su3 (tXs :=> tOut))   -- (5)
+  where
+    (su1, tXs :=> tOut) = freshFun su (length xs)           -- (1)
+    env'                = extTypesEnv env (zip xs tXs)      -- (2)
+    (su2, tBody)        = ti env' su1 body                  -- (3)
+    su3                 = unify (sourceSpan l) su2 tBody (apply su2 tOut)  -- (4)
 
 -- HINT: this is just like Lam except you have to figure out what
 -- type "f" should have when checking the body "e"
 
-ti _env _su (Fun _f Infer _xs _e _) = error "TBD:ti:fun:infer"
+ti env su (Fun f Infer xs e l) = (su3, apply su3 (tXs :=> tOut))   -- (5)
+  where
+    (su1, tXs :=> tOut) = freshFun su (length xs)           -- (1)
+    env'                = extTypesEnv env (zip xs tXs)      -- (2)
+    (su2, tBody)        = ti env' su1 e                  -- (3)
+    su3                 = unify (sourceSpan l) su2 tBody (apply su2 tOut)  -- (4)
+
+
+--   (su' , tIns)          = L.mapAccumL (ti env) su eIns
 
 -- HINT: this is hard, super EXTRA CREDIT.
 ti _env _su (Fun _f (Check _s) _xs _e _) = error "TBD:ti:fun:check"
@@ -259,8 +272,8 @@ tupPoly           = Forall [ "a", "b" ] (["a", "b"] :=> (TPair "a" "b") ) -- tup
 ifPoly            = Forall [ "b", "c" ] ([TBool, "b", "c"] :=> ("b"))
 
 fieldPoly :: Field -> Poly
-fieldPoly Zero    = Forall [ "a" ] ([ (TPair "a" "b") ] :=> "a")
-fieldPoly One     = Forall [ "b" ] ([ (TPair "a" "b") ] :=> "b")
+fieldPoly Zero    = Forall [ "a", "b"  ] ([ (TPair "a" "b") ] :=> "a")
+fieldPoly One     = Forall [ "a", "b"  ] ([ (TPair "a" "b") ] :=> "b")
 
 --------------------------------------------------------------------------------
 unify :: SourceSpan -> Subst -> Type -> Type -> Subst
@@ -271,9 +284,16 @@ unify sp su (ls :=> r) (ls' :=> r')
     s1                                = unifys sp su ls ls'
     s2                                = unify sp s1 (apply s1 r) (apply s1 r')
 
-unify _sp _su (TCtor _c _ts) (TCtor _c' _ts') = error "TBD:unify:ctor"
+unify sp su (TCtor c ts) (TCtor c' ts')
+  | c == c'    = unifys sp su ts ts'
+  | otherwise  = abort (errUnify sp ts ts')
+-- s2
 
-unify _sp _su (TPair _s1 _s2) (TPair _t1 _t2) = error "TBD:unify:pair"
+unify sp su (TPair s1 s2) (TPair t1 t2)
+  | (TPair t1 t2) == (TPair s1 s2)      = su
+
+
+  --unifys sp su (apply su (TPair t1 t2)) (apply su (TPair s1 s2))
 
 unify sp su (TVar a) t                  = varAsgn sp su a t
 unify sp su t (TVar a)                  = varAsgn sp su a t
