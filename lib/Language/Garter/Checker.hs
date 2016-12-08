@@ -193,6 +193,18 @@ ti env su (App eF eArgs l) = tiApp (sourceSpan l) sF (apply sF env) tF eArgs
   where
     (sF, tF)               = ti env su eF
 
+    -- tiApp takes in the SourceSpan (which is l, the metadata) and the SU which wis from ti env su ef
+
+
+    -- tiApp sp su env tF eIns   = (su''', apply su''' tOut)
+    --   where
+    --     (su' , tIns)          = L.mapAccumL (ti env) su eIns
+    --     (su'', tOut)          = freshTVar su'
+    --     su'''                 = unify sp su'' tF (tIns :=> tOut)
+    --
+    --
+    --
+
 -- For lambda-definitions
 -- 1. Generate a *function type* with fresh variables for the
    -- unknown inputs (`tXs`) and output (`tOut`),
@@ -213,10 +225,22 @@ ti env su (Lam xs body l) = (su3, apply su3 (tXs :=> tOut))   -- (5)
 
 ti env su (Fun f Infer xs e l) = (su3, apply su3 (tXs :=> tOut))   -- (5)
   where
-    (su1, tXs :=> tOut) = freshFun su (length xs)           -- (1)
+    -- env''               = extTypeEnv (bindId f) su1 env'
+    (su1, tXs :=> tOut) = freshFun su (length (xs))           -- (1)
     env'                = extTypesEnv env (zip xs tXs)      -- (2)
+
+
+-- Somewhere here I have to figure out what the type f should have when checking the body"e"
+
+
     (su2, tBody)        = ti env' su1 e                  -- (3)
     su3                 = unify (sourceSpan l) su2 tBody (apply su2 tOut)  -- (4)
+
+
+    -- env'' =  extTypeEnv (bindId f) xs env'
+
+    -- (sF, tF)            = ti env su f
+    --
 
 
 --   (su' , tIns)          = L.mapAccumL (ti env) su eIns
@@ -272,8 +296,8 @@ tupPoly           = Forall [ "a", "b" ] (["a", "b"] :=> (TPair "a" "b") ) -- tup
 ifPoly            = Forall [ "b", "c" ] ([TBool, "b", "c"] :=> ("b"))
 
 fieldPoly :: Field -> Poly
-fieldPoly Zero    = Forall [ "a", "b"  ] ([ (TPair "a" "b") ] :=> "a")
-fieldPoly One     = Forall [ "a", "b"  ] ([ (TPair "a" "b") ] :=> "b")
+fieldPoly Zero    = Forall [ "a", "b" ] ([TPair "a" "b"] :=> "a") -- (a, b) => a
+fieldPoly One     = Forall [ "a", "b" ] ([TPair "a" "b"] :=> "b") -- (a, b) => b
 
 --------------------------------------------------------------------------------
 unify :: SourceSpan -> Subst -> Type -> Type -> Subst
@@ -289,8 +313,12 @@ unify sp su (TCtor c ts) (TCtor c' ts')
   | otherwise  = abort (errUnify sp ts ts')
 -- s2
 
-unify sp su (TPair s1 s2) (TPair t1 t2)
-  | (TPair t1 t2) == (TPair s1 s2)      = su
+unify sp su p1@(TPair s1 s2) p2@(TPair t1 t2) = sub2   -- check the types
+  -- | otherwise  = abort (errUnify sp p1 p2)
+  where
+    sub1      = unify sp su s1 t1           -- s1 gets unified with t1
+    sub2      = unify sp sub1 (apply sub1 s2) (apply sub1 t2)
+    -- sub2      = unify  sp sub1 (apply s1 s2) (apply s1 t2)
 
 
   --unifys sp su (apply su (TPair t1 t2)) (apply su (TPair s1 s2))

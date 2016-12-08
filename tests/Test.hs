@@ -167,8 +167,8 @@ fdlTests sc =
 yourTests sc =
   [ -- Your tests go here
       mkTest sc "bool5"  File (rLines ["5"])
-    , mkTest sc "dyn3"   File (rLines ["15129"])
-    , mkTest sc "ifprint" File (rLines ["-120"])
+    , mkTest sc "dyn3"          File (staticError "cannot be an identifier")
+    , mkTest sc "ifprint"       File (staticError "cannot be an identifier")
     , mkTest sc "pair-2"        File      (rLines ["(10, 20)"])
     , mkTest sc "pair"          File      (rLines ["(10, (10, 20))"])
     , mkTest sc "tuple-01d"     File      (rLines ["10", "20", "30", "60"])
