@@ -209,6 +209,11 @@ ti env su (App eF eArgs l) = tiApp (sourceSpan l) sF (apply sF env) tF eArgs
 -- 1. Generate a *function type* with fresh variables for the
    -- unknown inputs (`tXs`) and output (`tOut`),
 -- 2. Extend the `env` so the parameters `xs` have types `tXs`,
+
+
+  -- Extend the env so f has the type
+
+
 -- 3. Infer the type of `body` under the extended `env'` as `tBody`,
 -- 4. Unify the *expected* output `tOut` with the *actual* `tBody`
 -- 5. Apply the substitutions to infer the function's type `tXs :=> tOut`.
@@ -227,23 +232,24 @@ ti env su (Fun f Infer xs e l) = (su3, apply su3 (tXs :=> tOut))   -- (5)
   where
     -- env''               = extTypeEnv (bindId f) su1 env'
     (su1, tXs :=> tOut) = freshFun su (length (xs))           -- (1)
-    env'                = extTypesEnv env (zip xs tXs)      -- (2)
+    env'                = extTypesEnv env (zip (xs) tXs)      -- (2)
 
 
--- Somewhere here I have to figure out what the type f should have when checking the body"e"
 
+    -- Next I need to add f into the function environment
+    --
+    (spam, t1)         = ti env' su1 (Id (bindId f) l) -- get the type of the function
+    env''              = apply spam env'               -- apply the sub to env' => env
+    s1                 = generalize env'' t1
+    --
+    env'''             = extTypeEnv (bindId f) s1 env'' -- extend the type environment with f
 
-    (su2, tBody)        = ti env' su1 e                  -- (3)
+    -- attempt 2
+    --tiApp (sourceSpan l) spam (apply spam env') t1 [e]
+
+    (su2, tBody)        = ti env''' spam e                  -- (3)
     su3                 = unify (sourceSpan l) su2 tBody (apply su2 tOut)  -- (4)
 
-
-    -- env'' =  extTypeEnv (bindId f) xs env'
-
-    -- (sF, tF)            = ti env su f
-    --
-
-
---   (su' , tIns)          = L.mapAccumL (ti env) su eIns
 
 -- HINT: this is hard, super EXTRA CREDIT.
 ti _env _su (Fun _f (Check _s) _xs _e _) = error "TBD:ti:fun:check"
